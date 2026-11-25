@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="lo">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NS Event Check-in</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f1f5f9;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 30px auto;
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #2563eb;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        #reader {
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            background: #f1f5f9;
+        }
+        
+.admin-nav {
+    display: flex;
+    gap: 12px;
+    padding: 12px 30px;
+    background: white;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.admin-nav a {
+    text-decoration: none;
+    color: #475569;
+    padding: 11px 20px;
+    border-radius: 8px;
+    font-weight: bold;
+    transition: 0.2s;
+}
+
+.admin-nav a:hover {
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.admin-nav a.active {
+    background: #2563eb;
+    color: white;
+}
+
+@media (max-width: 700px) {
+    .admin-nav {
+        padding: 12px 15px;
+    }
+}
+
+.admin-nav {
+    align-items: center;
+}
+
+#logoutButton {
+    margin-left: auto;
+    padding: 11px 20px;
+    border: none;
+    border-radius: 8px;
+    background: #fee2e2;
+    color: #dc2626;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+#logoutButton:hover {
+    background: #dc2626;
+    color: white;
+}
+
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>NS Freshman Welcome Event</h1>
+    
+
+<nav class="admin-nav">
+    <a href="dashboard.html">Dashboard</a>
+    <a href="checkin.html" class="active">ສະແກນ QR</a>
+    <button id="logoutButton" type="button">
+        Logout
+    </button>
+</nav>
+
+
+
+    <h2>ລະບົບ Check-in</h2>
+
+    <p>ກະລຸນາກົດປຸ່ມດ້ານລຸ່ມ
+    ເພື່ອເປີດກ້ອງສະແກນ QR Code</p>
+
+    <button id="startButton">
+        ເປີດກ້ອງສະແກນ QR
+    </button>
+
+    <div id="reader"></div>
+
+    <div id="result">
+        ລໍຖ້າການສະແກນ QR Code...
+    </div>
+
+</div>
+
+<script src="https://unpkg.com/html5-qrcode"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+   
+const SUPABASE_URL = "https://pkqksekvxvklwhotnfzf.supabase.co";
+const SUPABASE_KEY = "sb_publishable_cgNW2DK1gzwejrOuhiiNQA_4DMFaQ-a";
+
+const supabaseClient = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+);
+
+async function checkAdminLogin() {
+    const {
+        data: { session },
+        error
+    } = await supabaseClient.auth.getSession();
+
+    if (error || !session) {
+        window.location.href = "login.html";
+        return null;
+    }
+
+    const { data: profile, error: profileError } =
+        await supabaseClient
+            .from("profiles")
+            .select("role, is_active")
+            .eq("id", session.user.id)
+            .maybeSingle();
+
+    if (
+        profileError ||
+        !profile ||
+        profile.role !== "admin" ||
+        profile.is_active !== true
+    ) {
+        await supabaseClient.auth.signOut();
+        window.location.href = "login.html";
+        return null;
+    }
+
+    return session;
+}
+
+const startButton = document.getElementById("startButton");
+const result = document.getElementById("result");
+    
+const logoutButton = document.getElementById("logoutButton");
+
+logoutButton.addEventListener("click", async function () {
+    logoutButton.disabled = true;
+    logoutButton.textContent = "ກຳລັງອອກ...";
+
+    try {
+        if (scanning) {
+            await scanner.stop();
+            scanning = false;
+        }
+
+        const { error } = await supabaseClient.auth.signOut();
+
+        if (error) {
+            throw error;
+        }
+
+        window.location.href = "login.html";
+
+    } catch (error) {
+        alert("ອອກຈາກລະບົບບໍ່ສຳເລັດ: " + error.message);
+
+        logoutButton.disabled = false;
+        logoutButton.textContent = "Logout";
+    }
+});
+
+const scanner = new Html5Qrcode("reader");
+
+let scanning = false;
+let processing = false;
+
+startButton.addEventListener("click", async function () {
+    if (scanning || processing) return;
+
+    try {
+        const session = await checkAdminLogin();
+
+        if (!session) return;
+
+        await scanner.start(
+            { facingMode: "environment" },
+            {
+                fps: 10,
+                qrbox: { width: 250, height: 250 }
+            },
+            async function (decodedText) {
+                if (processing) return;
+
+                processing = true;
+
+                try {
+                    await scanner.stop();
+
+                    scanning = false;
+                    startButton.textContent = "ເປີດກ້ອງສະແກນ QR";
+
+                    result.textContent = "ກຳລັງກວດສອບ QR Code...";
+                    result.style.background = "#fef3c7";
+
+                    const response = await fetch(
+                        `${SUPABASE_URL}/functions/v1/checkin-student`,
+                        {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                                "apikey": SUPABASE_KEY,
+                                "Authorization": `Bearer ${session.access_token}`
+                            },
+                            body: JSON.stringify({
+                                qr_token: decodedText
+                            })
+                        }
+                    );
+
+                    const data = await response.json();
+
+                    if (!response.ok || !data.success) {
+                        throw new Error(
+                            data.message || "Check-in ບໍ່ສຳເລັດ"
+                        );
+                    }
+
+                    result.style.background = "#dcfce7";
+                    result.innerHTML = `
+                        <h2>Check-in ສຳເລັດ!</h2>
+                        <p>ຊື່: ${escapeHTML(data.student.first_name)}</p>
+                        <p>ນາມສະກຸນ: ${escapeHTML(data.student.last_name)}</p>
+                        <p>ສາຂາ: ${escapeHTML(data.student.major)}</p>
+                        <p>ຊັ້ນປີ: ${escapeHTML(String(data.student.study_year))}</p>
+                        <p>ເວລາ: ${escapeHTML(data.checked_in_at)}</p>
+                    `;
+
+                } catch (error) {
+                    result.style.background = "#fee2e2";
+                    result.textContent = error.message;
+
+                } finally {
+                    processing = false;
+                }
+            }
+        );
+
+        scanning = true;
+        startButton.textContent = "ກ້ອງກຳລັງເປີດ...";
+
+    } catch (error) {
+        scanning = false;
+        result.style.background = "#fee2e2";
+        result.textContent = "ເກີດຂໍ້ຜິດພາດ: " + error.message;
+        startButton.textContent = "ເປີດກ້ອງສະແກນ QR";
+    }
+});
+
+function escapeHTML(value) {
+    return String(value).replace(/[&<>"']/g, function (char) {
+        return {
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#039;"
+        }[char];
+    });
+}
+
+</script>
+
+</body>
+</html>

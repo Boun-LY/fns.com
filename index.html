@@ -1,0 +1,131 @@
+
+<!DOCTYPE html>
+<html lang="lo">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NS Freshman Welcome Event</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f1f5f9;
+            margin: 0;
+            padding: 25px 15px;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: auto;
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        h1 {
+            text-align: center;
+            color: #1d4ed8;
+            font-size: 25px;
+        }
+
+        h2 {
+            text-align: center;
+            color: #334155;
+            font-size: 19px;
+        }
+
+        p {
+            text-align: center;
+            color: #64748b;
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+            margin-bottom: 6px;
+            font-weight: bold;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        button {
+            width: 100%;
+            padding: 13px;
+            margin-top: 25px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 17px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>NS Freshman Welcome Event</h1>
+    <h2>ລະບົບລົງທະບຽນນັກສຶກສາ</h2>
+
+    <p>ກະລຸນາປ້ອນຂໍ້ມູນໃຫ້ຄົບຖ້ວນ</p>
+
+    <form id="registrationForm">
+
+        <label>ຊື່:</label>
+        <input type="text" id="first_name" required>
+
+        <label>ນາມສະກຸນ:</label>
+        <input type="text" id="last_name" required>
+
+        <label>ເບີໂທ:</label>
+        <input type="tel" id="phone" required>
+
+        <label>ສາຂາວິຊາ:</label>
+        <select id="major" required>
+            <option value="">-- ເລືອກສາຂາ --</option>
+            <option value="CS">CS</option>
+            <option value="CPR">CPR</option>
+            <option value="CW">CW</option>
+            <option value="AI">AI</option>
+        </select>
+
+        <label>ຊັ້ນປີ:</label>
+        <select id="study_year" required>
+            <option value="">-- ເລືອກຊັ້ນປີ --</option>
+            <option value="1">ປີ 1</option>
+            <option value="2">ປີ 2</option>
+            <option value="3">ປີ 3</option>
+        </select>
+
+        <button type="submit">ລົງທະບຽນ</button>
+
+    </form>
+    <div id="qrResult" style="display:none; text-align:center; margin-top:25px;">
+    <h2>ລົງທະບຽນສຳເລັດ!</h2>
+    <p>ກະລຸນາບັນທຶກ QR Code ຂອງເຈົ້າ</p>
+    <div id="qrcode"></div>
+    </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

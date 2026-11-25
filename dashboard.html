@@ -1,0 +1,412 @@
+
+<!DOCTYPE html>
+<html lang="lo">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #f1f5f9;
+        color: #1e293b;
+    }
+
+    h1, h2, h3 {
+        margin-top: 0;
+    }
+
+    body > h1 {
+        background: #1e40af;
+        color: white;
+        padding: 25px 30px;
+        margin: 0;
+    }
+
+    body > h2,
+    body > p {
+        margin-left: 30px;
+        margin-right: 30px;
+    }
+
+    body > h2 {
+        margin-top: 25px;
+    }
+
+    #dashboard {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+        padding: 20px 30px 40px;
+    }
+
+    #dashboard > div {
+        background: white;
+        padding: 24px;
+        border-radius: 14px;
+        box-shadow: 0 3px 12px rgba(0,0,0,0.06);
+    }
+
+    #dashboard h3 {
+        color: #64748b;
+        font-size: 16px;
+    }
+
+    #dashboard > div > p {
+        font-size: 32px;
+        font-weight: bold;
+        color: #2563eb;
+        margin-bottom: 0;
+    }
+
+    #majorStats,
+    #yearStats {
+        background: white;
+        padding: 20px;
+        border-radius: 14px;
+        box-shadow: 0 3px 12px rgba(0,0,0,0.06);
+    }
+
+    #majorStats {
+        grid-column: span 2;
+    }
+
+    #majorStats p,
+    #yearStats p {
+        padding: 12px;
+        background: #eff6ff;
+        border-radius: 8px;
+        margin: 8px 0;
+    }
+
+    @media (max-width: 700px) {
+        #dashboard {
+            grid-template-columns: 1fr;
+            padding: 15px;
+        }
+
+        #majorStats {
+            grid-column: span 1;
+        }
+    }
+
+    
+    #dashboard > div:nth-child(1) {
+        border-top: 5px solid #2563eb;
+    }
+
+    #dashboard > div:nth-child(2) {
+        border-top: 5px solid #16a34a;
+    }
+
+    #dashboard > div:nth-child(3) {
+        border-top: 5px solid #f59e0b;
+    }
+
+    #dashboard > div:nth-child(1) > p {
+        color: #2563eb;
+    }
+
+    #dashboard > div:nth-child(2) > p {
+        color: #16a34a;
+    }
+
+    #dashboard > div:nth-child(3) > p {
+        color: #d97706;
+    }
+
+    #dashboard > h3 {
+        grid-column: 1 / -1;
+        color: #1e40af;
+        margin-bottom: -10px;
+    }
+
+    #dashboard > div {
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    #dashboard > div:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 20px rgba(37,99,235,0.12);
+    }
+
+/* Dashboard layout improvements */
+
+body {
+    min-height: 100vh;
+}
+
+body > h1 {
+    background: linear-gradient(135deg, #1e40af, #2563eb);
+    letter-spacing: 0.5px;
+}
+
+body > p {
+    color: #64748b;
+    margin-bottom: 10px;
+    line-height: 1.6;
+}
+
+#dashboard {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+#dashboard > div {
+    border: 1px solid #e2e8f0;
+}
+
+#dashboard > div:nth-child(1),
+#dashboard > div:nth-child(2),
+#dashboard > div:nth-child(3) {
+    min-height: 145px;
+}
+
+#majorStats,
+#yearStats {
+    border: 1px solid #e2e8f0;
+}
+
+#majorStats p,
+#yearStats p {
+    color: #334155;
+    font-weight: 600;
+    border-left: 4px solid #3b82f6;
+}
+
+@media (max-width: 700px) {
+    body > h1 {
+        padding: 20px;
+        font-size: 24px;
+    }
+
+    body > h2,
+    body > p {
+        margin-left: 15px;
+        margin-right: 15px;
+    }
+}
+
+.admin-nav {
+    display: flex;
+    gap: 12px;
+    padding: 12px 30px;
+    background: white;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.admin-nav a {
+    text-decoration: none;
+    color: #475569;
+    padding: 11px 20px;
+    border-radius: 8px;
+    font-weight: bold;
+    transition: 0.2s;
+}
+
+.admin-nav a:hover {
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.admin-nav a.active {
+    background: #2563eb;
+    color: white;
+}
+
+@media (max-width: 700px) {
+    .admin-nav {
+        padding: 12px 15px;
+    }
+}
+.admin-nav {
+    align-items: center;
+}
+
+#logoutButton {
+    margin-left: auto;
+    padding: 11px 20px;
+    border: none;
+    border-radius: 8px;
+    background: #fee2e2;
+    color: #dc2626;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+#logoutButton:hover {
+    background: #dc2626;
+    color: white;
+}
+</style>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - NS Freshman Welcome</title>
+</head>
+<body>
+
+    <h1>NS Freshman Welcome</h1>
+    
+<nav class="admin-nav">
+    <a href="dashboard.html" class="active">Dashboard</a>
+    <a href="checkin.html">ສະແກນ QR</a>
+
+    <button id="logoutButton" type="button">
+        Logout
+    </button>
+</nav>
+
+    <h2>Admin Dashboard</h2>
+
+    <p>ພາບລວມຂໍ້ມູນການລົງທະບຽນ</p>
+
+<div id="dashboard">
+
+    <div>
+        <h3>ນັກສຶກສາລົງທະບຽນທັງໝົດ</h3>
+        <p id="totalRegistered">0</p>
+    </div>
+
+    <div>
+        <h3>ເຂົ້າຮ່ວມແລ້ວ</h3>
+        <p id="totalCheckedIn">0</p>
+    </div>
+
+    <div>
+        <h3>ຍັງບໍ່ໄດ້ Check-in</h3>
+        <p id="totalAbsent">0</p>
+    </div>
+
+    <h3>ສະຖິຕິຕາມສາຂາ</h3>
+    <div id="majorStats"></div>
+
+    <h3>ສະຖິຕິຕາມຊັ້ນປີ</h3>
+    <div id="yearStats"></div>
+
+</div>
+<script>
+const SUPABASE_URL = "https://pkqksekvxvklwhotnfzf.supabase.co";
+const SUPABASE_KEY = "sb_publishable_cgNW2DK1gzwejrOuhiiNQA_4DMFaQ-a";
+
+const supabaseClient = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+);
+async function checkAdminLogin() {
+    const {
+        data: { session },
+        error
+    } = await supabaseClient.auth.getSession();
+
+    if (error || !session) {
+        window.location.href = "login.html";
+        return null;
+    }
+
+    const { data: profile, error: profileError } =
+        await supabaseClient
+            .from("profiles")
+            .select("role, is_active")
+            .eq("id", session.user.id)
+            .maybeSingle();
+
+    if (
+        profileError ||
+        !profile ||
+        profile.role !== "admin" ||
+        profile.is_active !== true
+    ) {
+        await supabaseClient.auth.signOut();
+        window.location.href = "login.html";
+        return null;
+    }
+
+    return session;
+}
+
+async function loadDashboard() {
+    const session = await checkAdminLogin();
+
+    if (!session) return;
+
+    const dashboard = document.getElementById("dashboard");
+
+    try {
+        const { data, error } =
+            await supabaseClient.functions.invoke(
+                "dashboard-stats",
+                {
+                    headers: {
+                        Authorization: `Bearer ${session.access_token}`
+                    }
+                }
+            );
+
+        if (error) throw error;
+
+        if (!data || !data.success) {
+            throw new Error(
+                data?.message || "ບໍ່ສາມາດດຶງຂໍ້ມູນໄດ້"
+            );
+        }
+
+        const stats = data.stats;
+
+        document.getElementById("totalRegistered").textContent =
+            stats.total_registered;
+
+        document.getElementById("totalCheckedIn").textContent =
+            stats.total_checked_in;
+
+        document.getElementById("totalAbsent").textContent =
+            stats.total_absent;
+
+        document.getElementById("majorStats").innerHTML =
+            stats.by_major.map(item =>
+                `<p>${item.major}: ${item.total} ຄົນ</p>`
+            ).join("");
+
+        document.getElementById("yearStats").innerHTML =
+            stats.by_year.map(item =>
+                `<p>ຊັ້ນປີ ${item.study_year}: ${item.total} ຄົນ</p>`
+            ).join("");
+
+    } catch (error) {
+        console.error(error);
+        dashboard.textContent =
+            "ບໍ່ສາມາດໂຫຼດຂໍ້ມູນໄດ້: " + error.message;
+    }
+}
+const logoutButton = document.getElementById("logoutButton");
+
+logoutButton.addEventListener("click", async function () {
+    logoutButton.disabled = true;
+    logoutButton.textContent = "ກຳລັງອອກ...";
+
+    try {
+        const { error } = await supabaseClient.auth.signOut();
+
+        if (error) {
+            throw error;
+        }
+
+        window.location.href = "login.html";
+
+    } catch (error) {
+        alert("ອອກຈາກລະບົບບໍ່ສຳເລັດ: " + error.message);
+
+        logoutButton.disabled = false;
+        logoutButton.textContent = "Logout";
+    }
+});
+loadDashboard();
+
+</script>   
+</body>
+</html>
